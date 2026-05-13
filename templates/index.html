@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JobGuard AI — Detect fraudulent job postings using advanced XGBoost and CatBoost machine learning models. Protect yourself from fake job scams.">
+    <title>JobGuard AI — Fake Job Description Detector</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- ======= NAVBAR ======= -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-brand">
+            <i class="fas fa-shield-halved navbar-icon"></i>
+            <span class="navbar-title">JobGuard <span class="accent">AI</span></span>
+        </div>
+        <div class="navbar-links">
+            <a href="#how-it-works" class="nav-link">How It Works</a>
+            <a href="https://github.com" target="_blank" rel="noopener" class="btn-github" id="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </nav>
+
+    <!-- ======= HERO ======= -->
+    <header class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-satellite-dish"></i> AI-POWERED DETECTION
+            </div>
+            <h1 class="hero-title">
+                <span class="typewriter" id="typewriter"></span><span class="cursor" id="cursor">|</span>
+            </h1>
+            <p class="hero-sub">Paste any job listing below. Our ML ensemble analyzes text patterns, metadata signals, and behavioral red flags to determine if a posting is legitimate or fraudulent.</p>
+        </div>
+    </header>
+
+    <!-- ======= MAIN CONTENT ======= -->
+    <main class="main-grid" id="main-content">
+
+        <!-- LEFT: INPUT FORM -->
+        <section class="panel form-panel" id="form-panel">
+            <!-- Tabs -->
+            <div class="tab-bar" id="tab-bar">
+                <button class="tab active" data-tab="single" id="tab-single">
+                    <i class="fas fa-file-lines"></i> Single Job
+                </button>
+                <button class="tab" data-tab="batch" id="tab-batch">
+                    <i class="fas fa-layer-group"></i> Batch CSV
+                </button>
+            </div>
+
+            <!-- Single Job Tab -->
+            <div class="tab-content active" id="content-single">
+                <form id="predict-form" autocomplete="off">
+                    <div class="form-group">
+                        <label for="input-title">Job Title</label>
+                        <input type="text" id="input-title" placeholder="e.g. Senior Software Engineer" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-company">Company Profile</label>
+                        <textarea id="input-company" rows="3" placeholder="Brief company description..." class="form-control" data-counter></textarea>
+                        <span class="char-counter" id="counter-company">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-description">Job Description <span class="required">*</span></label>
+                        <textarea id="input-description" rows="6" placeholder="Full job description text..." class="form-control" data-counter required></textarea>
+                        <span class="char-counter" id="counter-description">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-requirements">Requirements</label>
+                        <textarea id="input-requirements" rows="3" placeholder="Skills, qualifications, experience..." class="form-control" data-counter></textarea>
+                        <span class="char-counter" id="counter-requirements">0</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-benefits">Benefits</label>
+                        <textarea id="input-benefits" rows="3" placeholder="Compensation, perks, benefits..." class="form-control" data-counter></textarea>
+                        <span class="char-counter" id="counter-benefits">0</span>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label for="select-employment">Employment Type</label>
+                            <select id="select-employment" class="form-control">
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Temporary">Temporary</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="select-experience">Required Experience</label>
+                            <select id="select-experience" class="form-control">
+                                <option value="Not Applicable">Not Applicable</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Entry level">Entry level</option>
+                                <option value="Associate">Associate</option>
+                                <option value="Mid-Senior level">Mid-Senior level</option>
+                                <option value="Director">Director</option>
+                                <option value="Executive">Executive</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="select-education">Required Education</label>
+                            <select id="select-education" class="form-control">
+                                <option value="Unspecified">Unspecified</option>
+                                <option value="High School">High School</option>
+                                <option value="Some College">Some College</option>
+                                <option value="Bachelor's Degree">Bachelor's Degree</option>
+                                <option value="Master's Degree">Master's Degree</option>
+                                <option value="PhD">PhD</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="toggle-group">
+                            <label class="toggle-label">Has Company Logo</label>
+                            <label class="toggle-switch" id="toggle-logo-switch">
+                                <input type="checkbox" id="toggle-logo" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle-label">Has Screening Questions</label>
+                            <label class="toggle-switch" id="toggle-questions-switch">
+                                <input type="checkbox" id="toggle-questions" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="model-selector">
+                        <label class="section-label">Model Selection</label>
+                        <div class="radio-group" id="model-radio-group">
+                            <label class="radio-card">
+                                <input type="radio" name="model" value="xgboost" id="radio-xgboost">
+                                <span class="radio-body">
+                                    <i class="fas fa-bolt"></i> XGBoost
+                                </span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="model" value="catboost" id="radio-catboost">
+                                <span class="radio-body">
+                                    <i class="fas fa-cat"></i> CatBoost
+                                </span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="model" value="ensemble" id="radio-ensemble" checked>
+                                <span class="radio-body">
+                                    <i class="fas fa-layer-group"></i> Ensemble
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-analyze" id="btn-analyze">
+                        <span class="btn-text"><i class="fas fa-radar"></i> ANALYZE JOB</span>
+                        <span class="btn-scanning"><i class="fas fa-spinner fa-spin"></i> SCANNING…</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Batch CSV Tab -->
+            <div class="tab-content" id="content-batch">
+                <div class="drop-zone" id="drop-zone">
+                    <i class="fas fa-cloud-arrow-up drop-icon"></i>
+                    <p class="drop-text">Drag & drop your CSV file here</p>
+                    <p class="drop-hint">or click to browse</p>
+                    <input type="file" id="file-input" accept=".csv" hidden>
+                    <span class="file-name" id="file-name"></span>
+                </div>
+                <div class="batch-actions">
+                    <a href="/sample-csv" class="btn-secondary" id="btn-sample-csv">
+                        <i class="fas fa-download"></i> Download Sample CSV
+                    </a>
+                    <button class="btn-analyze" id="btn-batch-analyze" disabled>
+                        <span class="btn-text"><i class="fas fa-radar"></i> ANALYZE BATCH</span>
+                        <span class="btn-scanning"><i class="fas fa-spinner fa-spin"></i> PROCESSING…</span>
+                    </button>
+                </div>
+                <!-- Batch Results Table -->
+                <div class="batch-results-wrapper" id="batch-results-wrapper" style="display:none">
+                    <h3 class="section-label"><i class="fas fa-table"></i> Batch Results</h3>
+                    <div class="table-scroll">
+                        <table class="batch-table" id="batch-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Verdict</th>
+                                    <th>Confidence</th>
+                                    <th>Risk</th>
+                                    <th>Flags</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batch-tbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="pagination"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: RESULT PANEL -->
+        <aside class="panel result-panel" id="result-panel">
+            <!-- Placeholder state -->
+            <div class="result-placeholder" id="result-placeholder">
+                <div class="placeholder-icon">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <p class="placeholder-text">Awaiting analysis…</p>
+                <p class="placeholder-hint">Fill in a job description and click <strong>ANALYZE JOB</strong> to begin.</p>
+            </div>
+
+            <!-- Scanning overlay -->
+            <div class="scan-overlay" id="scan-overlay">
+                <div class="scan-line"></div>
+                <p class="scan-text">Analyzing patterns…</p>
+            </div>
+
+            <!-- Result content (hidden until prediction) -->
+            <div class="result-content" id="result-content" style="display:none">
+                <!-- Verdict badge -->
+                <div class="verdict-section" id="verdict-section">
+                    <div class="verdict-badge" id="verdict-badge">
+                        <i class="fas fa-shield-halved verdict-icon" id="verdict-icon"></i>
+                        <span class="verdict-text" id="verdict-text"></span>
+                    </div>
+                </div>
+
+                <!-- Confidence gauge -->
+                <div class="gauge-section">
+                    <h3 class="result-label">Confidence</h3>
+                    <div class="gauge-wrapper">
+                        <svg class="gauge-svg" viewBox="0 0 200 120" id="gauge-svg">
+                            <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" />
+                            <path class="gauge-fill" id="gauge-fill" d="M 20 100 A 80 80 0 0 1 180 100" />
+                        </svg>
+                        <div class="gauge-value" id="gauge-value">0%</div>
+                    </div>
+                </div>
+
+                <!-- Model probabilities -->
+                <div class="prob-section">
+                    <h3 class="result-label">Model Probabilities (Fake)</h3>
+                    <div class="prob-row">
+                        <span class="prob-name">XGBoost</span>
+                        <div class="prob-bar-track">
+                            <div class="prob-bar" id="prob-bar-xgb"></div>
+                        </div>
+                        <span class="prob-value" id="prob-val-xgb">0%</span>
+                    </div>
+                    <div class="prob-row">
+                        <span class="prob-name">CatBoost</span>
+                        <div class="prob-bar-track">
+                            <div class="prob-bar" id="prob-bar-cb"></div>
+                        </div>
+                        <span class="prob-value" id="prob-val-cb">0%</span>
+                    </div>
+                </div>
+
+                <!-- Risk level -->
+                <div class="risk-section">
+                    <h3 class="result-label">Risk Level</h3>
+                    <div class="risk-badge" id="risk-badge">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="risk-text">LOW</span>
+                    </div>
+                </div>
+
+                <!-- Red flags -->
+                <div class="flags-section" id="flags-section" style="display:none">
+                    <h3 class="result-label"><i class="fas fa-flag"></i> Red Flags</h3>
+                    <ul class="flags-list" id="flags-list"></ul>
+                </div>
+
+                <!-- Footer -->
+                <div class="result-footer">
+                    <span id="model-used-text">Analyzed with: —</span>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- ======= HOW IT WORKS ======= -->
+    <section class="how-section" id="how-it-works">
+        <h2 class="section-heading">How It Works</h2>
+        <div class="how-grid">
+            <div class="how-card" id="how-card-1">
+                <div class="how-icon"><i class="fas fa-paste"></i></div>
+                <h3>Paste Job</h3>
+                <p>Copy and paste the job listing details into the form fields above.</p>
+            </div>
+            <div class="how-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="how-card" id="how-card-2">
+                <div class="how-icon"><i class="fas fa-microchip"></i></div>
+                <h3>AI Analysis</h3>
+                <p>Our XGBoost & CatBoost ensemble scans text patterns and metadata for fraud signals.</p>
+            </div>
+            <div class="how-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="how-card" id="how-card-3">
+                <div class="how-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Get Result</h3>
+                <p>Receive a clear verdict, confidence score, risk level, and detailed red flag breakdown.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======= FOOTER ======= -->
+    <footer class="site-footer" id="site-footer">
+        <p>&copy; 2026 JobGuard AI &mdash; Built with Flask, XGBoost &amp; CatBoost</p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
