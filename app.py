@@ -46,7 +46,7 @@ def load_models():
         print(f"[OK] Preprocessor loaded from {preprocessor_path}")
     except FileNotFoundError:
         print(f"[!!] Preprocessor not found at {preprocessor_path}")
-        print("    Run `python create_dummy_models.py` to generate test models.")
+        print("    Run `python train_models.py` to generate test models.")
         return
     except Exception as e:
         print(f"[!!] Error loading preprocessor: {e}")
